@@ -137,11 +137,12 @@ function useHash() {
 
 const go = v => { location.hash = v; };
 
-const QR_SVG = `<svg viewBox="0 0 370 370" role="img" aria-label="QR Code do site" style="width:100%;height:auto;display:block"><g transform="scale(10)"><path fill="#fff" d="M0 0h37v37h-37z"/><path class="qrline" stroke="#0b3d3a" d="M2 2.5h7m1 0h2m1 0h5m2 0h1m2 0h2m3 0h7m-33 1h1m5 0h1m1 0h2m1 0h1m1 0h2m1 0h2m1 0h2m1 0h1m1 0h1m1 0h1m5 0h1m-33 1h1m1 0h3m1 0h1m1 0h4m1 0h4m2 0h3m4 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m4 0h2m1 0h1m1 0h2m2 0h1m5 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h2m2 0h1m2 0h2m2 0h1m1 0h1m1 0h1m2 0h1m1 0h3m1 0h1m-33 1h1m5 0h1m6 0h6m4 0h2m1 0h1m5 0h1m-33 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-21 1h2m1 0h2m3 0h1m1 0h1m-23 1h1m2 0h6m2 0h1m2 0h1m2 0h1m1 0h2m1 0h1m1 0h2m2 0h1m1 0h3m-33 1h1m2 0h3m2 0h1m1 0h1m1 0h2m1 0h1m2 0h2m2 0h2m4 0h5m-30 1h4m1 0h1m1 0h4m1 0h1m1 0h1m2 0h2m1 0h1m2 0h1m1 0h5m-29 1h2m2 0h2m1 0h1m1 0h1m2 0h2m1 0h1m3 0h1m1 0h1m1 0h1m2 0h1m-30 1h1m2 0h1m1 0h1m3 0h2m1 0h1m1 0h1m3 0h1m1 0h1m1 0h6m3 0h1m-31 1h4m1 0h5m2 0h1m6 0h2m4 0h1m-28 1h2m3 0h4m1 0h1m1 0h1m2 0h1m1 0h1m1 0h2m3 0h1m1 0h2m1 0h2m-31 1h2m1 0h1m5 0h1m4 0h1m1 0h1m1 0h2m2 0h2m1 0h1m1 0h2m1 0h1m1 0h1m-33 1h1m5 0h2m2 0h2m1 0h1m1 0h2m5 0h1m2 0h4m-28 1h1m1 0h3m1 0h3m1 0h2m1 0h1m2 0h4m1 0h1m3 0h1m1 0h1m1 0h1m1 0h1m-33 1h1m1 0h1m2 0h2m1 0h1m2 0h1m2 0h2m1 0h3m1 0h1m1 0h1m2 0h2m1 0h2m1 0h1m-33 1h1m4 0h1m2 0h1m1 0h2m1 0h4m1 0h3m1 0h1m1 0h1m3 0h3m-31 1h1m1 0h1m3 0h1m3 0h1m2 0h2m1 0h2m1 0h1m2 0h1m1 0h1m2 0h1m1 0h1m-30 1h1m1 0h1m4 0h1m1 0h2m1 0h2m5 0h1m3 0h1m1 0h1m1 0h4m-31 1h1m1 0h5m1 0h2m2 0h3m2 0h2m2 0h1m1 0h2m1 0h1m2 0h4m-33 1h1m3 0h1m3 0h2m2 0h2m1 0h1m1 0h1m1 0h1m3 0h4m1 0h1m1 0h1m-31 1h2m1 0h1m2 0h1m1 0h1m2 0h1m2 0h1m1 0h1m2 0h2m2 0h6m2 0h1m-24 1h1m1 0h2m2 0h2m2 0h1m2 0h1m2 0h1m3 0h1m1 0h1m-31 1h7m1 0h3m1 0h1m1 0h11m1 0h1m1 0h1m1 0h1m-31 1h1m5 0h1m1 0h1m10 0h1m3 0h2m3 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h2m1 0h1m1 0h12m-29 1h1m1 0h3m1 0h1m1 0h4m1 0h2m1 0h4m1 0h1m1 0h3m1 0h1m1 0h4m-33 1h1m1 0h3m1 0h1m2 0h2m1 0h1m2 0h2m1 0h2m1 0h2m2 0h1m1 0h6m-33 1h1m5 0h1m2 0h1m1 0h4m4 0h2m1 0h2m2 0h7m-33 1h7m1 0h5m1 0h2m1 0h1m4 0h9"/></g></svg>`;
+// QR Code gerado diretamente com o link oficial do GitHub Pages
+const QR_HTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=https%3A%2F%2Fgabrielteramae.github.io%2Fgestao-ambiental%2F" alt="QR Code do site" style="width:100%;height:auto;display:block;border-radius:6px">`;
 
 function Qr() {
     return h("div", { className: "qr" },
-        h("div", { dangerouslySetInnerHTML: { __html: QR_SVG } }),
+        h("div", { dangerouslySetInnerHTML: { __html: QR_HTML } }),
         h("b", null, "Aponte a câmera para acessar")
     );
 }
