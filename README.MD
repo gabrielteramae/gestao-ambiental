@@ -4,31 +4,16 @@
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white)
 
-Site da oficina para a disciplina de Gestão Ambiental na USP–EACH. Cada grupo abre a reportagem do seu tema, com números da matéria, resumo rápido e link da fonte. A Carta da Juventude guarda o rascunho (diagnóstico, propostas e demandas) no próprio celular.
+Aplicação web interativa desenvolvida para a Oficina de Gestão Ambiental. O site organiza reportagens socioambientais divididas em 6 grupos temáticos, com contadores animados, alternância entre matéria completa e resumo rápido, além da seção interativa da Carta da Juventude.
 
-No ar em [gabrielteramae.github.io/gestao-ambiental](https://gabrielteramae.github.io/gestao-ambiental/).
-
-React, a fonte e as imagens ficam no repositório. A página não depende de CDN para abrir.
-
-## Grupos
-
-| Grupo | Tema |
-| --- | --- |
-| 1 | Saúde |
-| 2 | Inclusão e Vulnerabilidades |
-| 3 | Educação |
-| 4 | Políticas Públicas e Participação |
-| 5 | Trabalho e Economia |
-| 7 | Comunicação e Consciência |
-
-Não há grupo 6 neste roteiro. O 7 segue a numeração da atividade.
+Otimizado para máxima performance, navegação fluida em dispositivos móveis e projeção em tela grande via QR Code integrado.
 
 ## Stack
 
-- React 18 (UMD, sem build e sem bundler)
-- JavaScript (ES6+)
-- CSS com variáveis, safe area e `prefers-reduced-motion`
-- Inter, arquivo local
+- React 18 (via CDN otimizada)
+- JavaScript (ES6+) estruturado
+- CSS3 responsivo com variáveis, gradientes e suporte a _Safe Areas_ de dispositivos móveis
+- Tipografia Inter (Google Fonts)
 
 ## Estrutura
 
@@ -36,26 +21,4 @@ Não há grupo 6 neste roteiro. O 7 segue a numeração da atividade.
 index.html
 styles.css
 script.js
-data.js
-vendor/
-  react.production.min.js
-  react-dom.production.min.js
-  inter-latin.woff2
-qr.png
-icone-play.png
-pixel.mp4
 ```
-
-## Como rodar
-
-O jeito previsto é o GitHub Pages. Para ver na máquina:
-
-```bash
-git clone https://github.com/gabrielteramae/gestao-ambiental.git
-cd gestao-ambiental
-python3 -m http.server 8080
-```
-
-Abra `http://localhost:8080`. Dá para abrir o `index.html` direto no navegador; o rascunho da carta usa `localStorage` e fica mais confiável servido por HTTP.
-
-© 2026 Gabriel Teramae Chan

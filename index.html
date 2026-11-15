@@ -21,12 +21,22 @@
     <meta property="og:description" content="Descubra qual é o seu grupo e leia a notícia do seu tema.">
     <meta property="og:url" content="https://gabrielteramae.github.io/gestao-ambiental/">
 
-    <link rel="stylesheet" href="styles.css?v=16">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap"
+        media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap">
+    </noscript>
+    <link rel="stylesheet" href="styles.css?v=15">
 
-    <script defer src="vendor/react.production.min.js"></script>
-    <script defer src="vendor/react-dom.production.min.js"></script>
-    <script defer src="data.js?v=16"></script>
-    <script defer src="script.js?v=16"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"
+        crossorigin></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"
+        crossorigin></script>
+    <script defer src="data.js?v=15"></script>
+    <script defer src="script.js?v=15"></script>
 </head>
 
 <body>
@@ -47,7 +57,7 @@
             setTimeout(function () {
                 var root = document.getElementById("root");
                 if (root && root.querySelector(".boot")) {
-                    root.innerHTML = '<p style="padding:24px;color:#fff;font:16px/1.5 sans-serif">Não foi possível carregar a página. Atualize o navegador e <a href="" style="color:#fff">tente de novo</a>.</p>';
+                    root.innerHTML = '<p style="padding:24px;color:#fff;font:16px/1.5 sans-serif">Não foi possível carregar a página. Verifique a conexão com a internet, atualize o navegador e <a href="" style="color:#fff">tente de novo</a>.</p>';
                 }
             }, 4000);
         });

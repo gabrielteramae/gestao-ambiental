@@ -5,8 +5,6 @@ if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 
 const SITE_NAME = "Oficina de Gestão Ambiental";
 const SITE_URL = "https://gabrielteramae.github.io/gestao-ambiental/#groups";
-const CARTA_KEY = "oga-carta-v1";
-const CARTA_GROUP_KEY = "oga-carta-grupo";
 
 const formatNumber = n => n.toLocaleString("pt-BR");
 const prefersReducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -36,15 +34,6 @@ function useHash() {
 }
 
 const go = route => { location.hash = route; };
-
-const readStore = (key, fallback) => {
-    try {
-        const raw = localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : fallback;
-    } catch (e) {
-        return fallback;
-    }
-};
 
 const QR_ONLINE = "https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=" + encodeURIComponent(SITE_URL);
 
@@ -156,10 +145,9 @@ function Navbar({ current }) {
 
 function Stat({ stat }) {
     const numberRef = useRef();
-    const textual = stat.text != null;
     const format = value => (stat.prefix || "") + (stat.raw ? String(value) : formatNumber(value)) + (stat.suffix || "");
-    const finalText = textual ? stat.text : format(stat.value);
-    const animate = !textual && !stat.raw && !prefersReducedMotion();
+    const finalText = format(stat.value);
+    const animate = !stat.raw && !prefersReducedMotion();
 
     useEffect(() => {
         const el = numberRef.current;
@@ -173,7 +161,7 @@ function Stat({ stat }) {
         };
         frame = requestAnimationFrame(step);
         return () => cancelAnimationFrame(frame);
-    }, [animate, stat.value]);
+    }, []);
 
     return h("div", { className: "stat" },
         h("b", null,
@@ -189,14 +177,9 @@ function Groups() {
         h("h2", { className: "h1", style: { marginBottom: 14 } }, "Qual é o seu", h("br"), "grupo?"),
         h("p", { className: "lead" }, "Toque no seu grupo para abrir a notícia."),
         h("div", { className: "grid" },
-            GROUPS.map((group, i) => h("button", {
+            GROUPS.map(group => h("button", {
                 key: group.number,
                 className: "card",
-                style: {
-                    "--c": group.color,
-                    "--t": group.textColor,
-                    animationDelay: (i * 70) + "ms"
-                },
                 onClick: () => go("g" + group.number)
             },
                 h("small", null, "Grupo"),
@@ -216,7 +199,7 @@ function Home({ route }) {
 
     const showGroups = () => {
         if (route === "groups" && groupsRef.current) {
-            groupsRef.current.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth" });
+            groupsRef.current.scrollIntoView({ behavior: "smooth" });
         } else {
             go("groups");
         }
@@ -294,7 +277,7 @@ function News({ group }) {
 
     const colorVars = { "--c": group.color, "--t": group.textColor };
     const index = GROUPS.findIndex(item => item.number === group.number);
-    const next = GROUPS[(index + 1) % GROUPS.length];
+    const nextNumber = GROUPS[(index + 1) % GROUPS.length].number;
 
     const tabId = id => "tab-" + id;
     const panelId = id => "panel-" + id;
@@ -324,114 +307,12 @@ function News({ group }) {
         h(Panel, { group, key: tab, tabId: panelId(tab), labelId: tabId(tab) }),
         h("div", { className: "row" },
             h("button", { className: "btn s", onClick: () => go("groups") }, "← Todos os grupos"),
-            h("button", { className: "btn s", onClick: () => go("g" + next.number) }, "Grupo " + next.number + " · " + next.theme + " →")
+            h("button", { className: "btn s", onClick: () => go("g" + nextNumber) }, "Ver grupo " + nextNumber + " →")
         )
     );
 }
 
-const CARTA_FIELDS = [
-    {
-        key: "diagnostico",
-        title: "1. Diagnóstico",
-        hint: "Problemas, gargalos e vulnerabilidades da reportagem.",
-        className: "postit-yellow"
-    },
-    {
-        key: "propostas",
-        title: "2. Propostas",
-        hint: "Soluções e ações práticas para o território.",
-        className: "postit-green"
-    },
-    {
-        key: "demandas",
-        title: "3. Demandas",
-        hint: "O que os jovens reivindicam daqui pra frente.",
-        className: "postit-blue"
-    }
-];
-
-const blankDraft = () => ({ diagnostico: "", propostas: "", demandas: "" });
-
 function Carta() {
-    const [groupNumber, setGroupNumber] = useState(() => {
-        try {
-            const saved = +localStorage.getItem(CARTA_GROUP_KEY);
-            return GROUPS.some(group => group.number === saved) ? saved : GROUPS[0].number;
-        } catch (e) {
-            return GROUPS[0].number;
-        }
-    });
-    const [drafts, setDrafts] = useState(() => readStore(CARTA_KEY, {}));
-    const [notice, setNotice] = useState("");
-    const timer = useRef();
-    const group = GROUPS.find(item => item.number === groupNumber);
-    const draft = drafts[groupNumber] || blankDraft();
-
-    useEffect(() => {
-        try { localStorage.setItem(CARTA_GROUP_KEY, String(groupNumber)); } catch (e) {}
-    }, [groupNumber]);
-
-    useEffect(() => {
-        try { localStorage.setItem(CARTA_KEY, JSON.stringify(drafts)); } catch (e) {}
-    }, [drafts]);
-
-    useEffect(() => () => clearTimeout(timer.current), []);
-
-    const flash = message => {
-        setNotice(message);
-        clearTimeout(timer.current);
-        timer.current = setTimeout(() => setNotice(""), 2200);
-    };
-
-    const update = (field, value) => {
-        setDrafts(prev => {
-            const current = prev[groupNumber] || blankDraft();
-            return { ...prev, [groupNumber]: { ...current, [field]: value } };
-        });
-    };
-
-    const copyCarta = async () => {
-        const body = [
-            "Carta da Juventude — Grupo " + group.number + " · " + group.theme,
-            "",
-            "1. Diagnóstico",
-            draft.diagnostico.trim() || "(em branco)",
-            "",
-            "2. Propostas",
-            draft.propostas.trim() || "(em branco)",
-            "",
-            "3. Demandas",
-            draft.demandas.trim() || "(em branco)"
-        ].join("\n");
-        try {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                await navigator.clipboard.writeText(body);
-            } else {
-                const area = document.createElement("textarea");
-                area.value = body;
-                area.setAttribute("readonly", "");
-                area.style.position = "fixed";
-                area.style.left = "-9999px";
-                document.body.appendChild(area);
-                area.select();
-                const ok = document.execCommand("copy");
-                area.remove();
-                if (!ok) throw new Error("copy");
-            }
-            flash("Carta copiada.");
-        } catch (e) {
-            flash("Não foi possível copiar. Selecione o texto e copie manualmente.");
-        }
-    };
-
-    const clearDraft = () => {
-        const hasText = CARTA_FIELDS.some(field => (draft[field.key] || "").trim());
-        if (!hasText) return;
-        if (!window.confirm("Apagar o rascunho do grupo " + group.number + " neste celular?")) return;
-        setDrafts(prev => ({ ...prev, [groupNumber]: blankDraft() }));
-        flash("Rascunho apagado.");
-    };
-
     return h("div", { className: "carta-container view" },
         h("div", { className: "carta-header" },
             h("h1", null, "CARTA DA JUVENTUDE")
@@ -439,43 +320,24 @@ function Carta() {
         h("div", { className: "carta-instructions" },
             h("h2", null, "Como vai funcionar a atividade"),
             h("ol", null,
-                h("li", null, h("strong", null, "Diagnóstico: "), "o que a reportagem mostra de problema, gargalo e vulnerabilidade no território."),
-                h("li", null, h("strong", null, "Propostas: "), "o que o grupo faria, na prática, para mudar esse quadro."),
-                h("li", null, h("strong", null, "Demandas: "), "o que os jovens cobram de quem decide, por escrito.")
+                h("li", null, h("strong", null, "Diagnóstico: "), "Apresenta a identificação e análise dos principais problemas, gargalos e vulnerabilidades socioambientais relacionados ao tema na região."),
+                h("li", null, h("strong", null, "Propostas: "), "Indica as formulações coletivas de soluções, melhorias e ações práticas que devem ser aplicadas no território."),
+                h("li", null, h("strong", null, "Demandas: "), "Consolida as reivindicações concretas e o posicionamento oficial defendido pelos jovens para garantir sustentabilidade e direitos.")
             )
         ),
-        h("p", { className: "carta-picked" }, "Escrevendo pelo grupo " + group.number + " · " + group.theme),
-        h("div", { className: "chips", role: "group", "aria-label": "Escolher grupo" },
-            GROUPS.map(item => h("button", {
-                key: item.number,
-                type: "button",
-                className: "chip",
-                style: { background: item.color, color: item.textColor },
-                "aria-pressed": item.number === groupNumber,
-                "aria-label": "Grupo " + item.number + ", " + item.theme,
-                onClick: () => setGroupNumber(item.number)
-            }, String(item.number)))
-        ),
-        h("div", { className: "carta-postits", key: groupNumber },
-            CARTA_FIELDS.map(field => h("div", { key: field.key, className: field.className },
-                h("label", { className: "postit-title", htmlFor: "carta-" + field.key }, field.title),
-                h("p", { className: "carta-hint" }, field.hint),
-                h("textarea", {
-                    id: "carta-" + field.key,
-                    className: "carta-field",
-                    value: draft[field.key],
-                    placeholder: "Escrevam aqui…",
-                    rows: 5,
-                    onChange: e => update(field.key, e.target.value)
-                })
-            ))
-        ),
-        h("p", { className: "carta-status" + (notice ? " is-flash" : ""), role: "status" },
-            notice || "O rascunho fica salvo só neste celular. Não sincroniza com o grupo."
-        ),
-        h("div", { className: "carta-actions" },
-            h("button", { type: "button", className: "btn", onClick: copyCarta }, "Copiar carta"),
-            h("button", { type: "button", className: "btn s", onClick: clearDraft }, "Apagar rascunho")
+        h("div", { className: "carta-postits" },
+            h("div", { className: "postit-yellow" },
+                h("div", { className: "postit-title" }, "1. Diagnóstico"),
+                h("p", { className: "postit-text" }, "Identifique e analise os principais problemas, gargalos e vulnerabilidades socioambientais presentes na reportagem.")
+            ),
+            h("div", { className: "postit-green" },
+                h("div", { className: "postit-title" }, "2. Propostas"),
+                h("p", { className: "postit-text" }, "Defina coletivamente as soluções, melhorias e transformações práticas que devem ser aplicadas no território.")
+            ),
+            h("div", { className: "postit-blue" },
+                h("div", { className: "postit-title" }, "3. Demandas"),
+                h("p", { className: "postit-text" }, "Consolide as reivindicações concretas e o posicionamento defendido pelos jovens para o futuro sustentável.")
+            )
         ),
         h("div", { className: "carta-back" },
             h("button", { className: "btn s", onClick: () => go("home") }, "← Voltar ao Início")
@@ -491,11 +353,11 @@ function App() {
 
     useEffect(() => {
         document.title = group
-            ? "Grupo " + group.number + " · " + SITE_NAME
+            ? `Grupo ${group.number} · ${SITE_NAME}`
             : route === "carta"
-                ? "Carta da Juventude · " + SITE_NAME
+                ? `Carta da Juventude · ${SITE_NAME}`
                 : SITE_NAME;
-    }, [route, group]);
+    }, [route]);
 
     useEffect(() => {
         if (firstRender.current) {
