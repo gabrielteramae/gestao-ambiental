@@ -3,22 +3,65 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#0b3d3a">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="application-name" content="Gestão Ambiental">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Gestão Ambiental">
     <title>Oficina de Gestão Ambiental</title>
+    <meta name="description"
+        content="Oficina de Gestão Ambiental: descubra seu grupo, leia a notícia do seu tema e construa a Carta da Juventude.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:title" content="Oficina de Gestão Ambiental">
+    <meta property="og:description" content="Descubra qual é o seu grupo e leia a notícia do seu tema.">
+    <meta property="og:url" content="https://gabrielteramae.github.io/gestao-ambiental/">
+
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="styles.css?v=12">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap"
+        media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&display=swap">
+    </noscript>
+    <link rel="stylesheet" href="styles.css?v=15">
+
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"
+        crossorigin></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"
+        crossorigin></script>
+    <script defer src="data.js?v=15"></script>
+    <script defer src="script.js?v=15"></script>
 </head>
 
 <body>
-    <div id="root"></div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js" crossorigin></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"
-        crossorigin></script>
-    <script src="script.js?v=12" defer></script>
+    <div id="root">
+        <section class="earth-hero boot">
+            <h1>Oficina de Gestão Ambiental</h1>
+            <p class="lead">Carregando…</p>
+        </section>
+    </div>
+    <noscript>
+        <p style="padding:24px;color:#fff;font:16px/1.5 sans-serif">
+            Este site precisa de JavaScript para funcionar. Ative o JavaScript no navegador e recarregue a página.
+        </p>
+    </noscript>
+
+    <script>
+        window.addEventListener("load", function () {
+            setTimeout(function () {
+                var root = document.getElementById("root");
+                if (root && root.querySelector(".boot")) {
+                    root.innerHTML = '<p style="padding:24px;color:#fff;font:16px/1.5 sans-serif">Não foi possível carregar a página. Verifique a conexão com a internet, atualize o navegador e <a href="" style="color:#fff">tente de novo</a>.</p>';
+                }
+            }, 4000);
+        });
+    </script>
 </body>
 
 </html>
