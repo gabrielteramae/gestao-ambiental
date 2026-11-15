@@ -6,7 +6,7 @@ body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;bac
 
 #root{max-width:1100px;margin:0 auto;padding:max(20px,env(safe-area-inset-top, 0px)) max(18px,env(safe-area-inset-left, 0px)) max(95px,calc(env(safe-area-inset-bottom, 0px) + 80px)) max(18px,env(safe-area-inset-right, 0px))}
 
-/* Navbar Fixa na Parte de Baixo (Estilo App Tab Bar) */
+/* Navbar Fixa na Parte de Baixo (Apenas Carta da Juventude) */
 .navbar{
   position:fixed;
   bottom:0;
@@ -16,32 +16,31 @@ body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;bac
   backdrop-filter:blur(14px);
   -webkit-backdrop-filter:blur(14px);
   border-top:1px solid rgba(255,255,255,0.15);
-  padding:8px 16px max(12px, env(safe-area-inset-bottom, 12px)) 16px;
+  padding:10px 16px max(14px, env(safe-area-inset-bottom, 14px)) 16px;
   box-shadow:0 -10px 30px rgba(0,0,0,0.3);
   z-index:9999;
 }
 .nav-links{
   display:flex;
-  justify-content:space-around;
+  justify-content:center;
   align-items:center;
   max-width:480px;
   margin:0 auto;
 }
 .nav-link{
   font:inherit;
-  font-size:0.72rem;
-  font-weight:500;
+  font-size:0.85rem;
+  font-weight:600;
   cursor:pointer;
   background:transparent;
-  color:rgba(255,255,255,0.65);
+  color:#fff;
   border:0;
-  padding:6px 12px;
+  padding:8px 24px;
   border-radius:12px;
   text-decoration:none;
   display:flex;
-  flex-direction:column;
   align-items:center;
-  gap:4px;
+  gap:10px;
   transition:all .15s ease;
   touch-action:manipulation;
   -webkit-appearance:none;
@@ -54,7 +53,7 @@ body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;bac
   transition:transform .15s ease;
 }
 .nav-link:hover, .nav-link[aria-current="true"]{
-  color:#fff;
+  background:rgba(255,255,255,0.15);
 }
 .nav-link[aria-current="true"] svg{
   transform:scale(1.1);
