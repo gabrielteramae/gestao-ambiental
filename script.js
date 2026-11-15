@@ -213,7 +213,8 @@ function Home({ route }) {
                 h("button", { className: "hint", onClick: showGroups }, "Desça a página e descubra qual é o seu tema ↓")
             )
         ),
-        h("div", { ref: groupsRef, id: "groups-section" }, h(Groups))
+        h("div", { ref: groupsRef, id: "groups-section" }, h(Groups)),
+        h(Footer)
     );
 }
 
@@ -342,6 +343,12 @@ function Carta() {
         h("div", { className: "carta-back" },
             h("button", { className: "btn s", onClick: () => go("home") }, "← Voltar ao Início")
         )
+    );
+}
+
+function Footer() {
+    return h("footer", { className: "site-footer" },
+        "© 2026 Gabriel Teramae. Todos os direitos reservados."
     );
 }
 
