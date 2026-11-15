@@ -90,7 +90,7 @@ const GROUPS = [
         stats: [
             { value: 13, suffix: "%", label: "dos empregos da cidade estão na Zona Leste" },
             { value: 35, suffix: "%", label: "da população paulistana vive lá" },
-            { value: 12, prefix: "11–", suffix: "%", label: "de cobertura vegetal (a cidade toda: 54%)" }
+            { text: "11–12%", label: "de cobertura vegetal (a cidade toda: 54%)" }
         ],
         text: [
             "No podcast, o pesquisador José Luiz Portella (USP) lembra que a zona leste tem mais de 4 milhões de habitantes, cerca de 35% do município, mas apenas 13% dos empregos. A renda média local é de dois terços da do resto da cidade.",
@@ -104,19 +104,19 @@ const GROUPS = [
         theme: "Comunicação e Consciência",
         color: "#d81b84",
         textColor: "#fff",
-        source: "UFRN · Matérias Especiais",
+        source: "UFRN · Agecom · 21/03/2025 · Giovana Góis e Juliana Holanda",
         title: "Comunicação, consciência e meio ambiente",
         url: "https://www.ufrn.br/imprensa/materias-especiais/88561/comunicacao-consciencia-e-meio-ambiente",
         stats: [
-            { value: 1968, raw: true, label: "ano de fundação do Clube de Roma" },
-            { value: 1972, raw: true, label: "Conferência de Estocolmo e relatório “Limites do Crescimento”" },
-            { value: 1992, raw: true, label: "Rio-92: conferência da ONU sobre meio ambiente e desenvolvimento" }
+            { value: 90, suffix: "%", label: "dos municípios brasileiros têm problemas ambientais (IBGE)" },
+            { value: 250, prefix: "+", label: "edições do Minuto Sustentável desde 2021" },
+            { value: 5, label: "gravações por semana, com uma equipe pequena" }
         ],
         text: [
-            "A relação entre comunicação, consciência e meio ambiente é fundamental para mobilizar a sociedade em direção a práticas sustentáveis e à preservação dos recursos naturais.",
-            "Através de reportagens especiais e iniciativas acadêmicas, como as desenvolvidas na UFRN, evidencia-se que a informação clara e acessível desperta a conscientização ecológica e fomenta o engajamento comunitário.",
-            "O papel dos meios de comunicação vai além da transmissão de dados: eles atuam como catalisadores de debates essenciais para a formulação de políticas públicas e para a mudança de hábitos cotidianos em prol do planeta."
+            "A desinformação é um dos principais obstáculos para enfrentar a crise climática: notícias falsas distorcem dados e enfraquecem a mobilização. Em resposta, o Instituto Humanitas, a Universitária FM 88.9 e a Superintendência de Comunicação da UFRN mantêm o Minuto Sustentável, no ar desde outubro de 2021 e também na plataforma Nosso Futuro Comum.",
+            "São reportagens, entrevistas e trechos de relatórios científicos, com mais de 250 edições e cerca de cinco gravações por semana, feitas por voluntários e bolsistas. O programa nasceu na pandemia, em conversa com Heitor Matallo, ex-funcionário da ONU, e passou a ser transmitido em setembro de 2021.",
+            "O coordenador, professor Orivaldo Pimentel Lopes Junior, diz que hábitos do dia a dia ajudam, mas só a atuação política muda o rumo da crise, e que uma sociedade bem informada escolhe quem defende a causa ambiental. A matéria cita o IBGE: 90% dos municípios brasileiros têm problemas ambientais. A equipe, ligada ao grupo Marginália e ao INCT-Klimapolis, quer levar o programa a outras rádios e sites."
         ],
-        summary: "A comunicação é central para mobilizar a sociedade por práticas sustentáveis. Informação clara e acessível aumenta a consciência ambiental e alimenta o debate sobre políticas públicas."
+        summary: "O Minuto Sustentável, parceria da UFRN com a rádio Universitária, enfrenta a desinformação climática desde 2021 e já passou de 250 edições. A equipe defende que informação ambiental precisa virar atuação política."
     }
 ];
