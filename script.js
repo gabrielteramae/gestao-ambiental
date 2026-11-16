@@ -469,7 +469,7 @@ function Votacao() {
 
     return h("section", { className: "view vote" },
         h("h1", null, "Votação"),
-        h("p", { className: "lead" }, "O número daqui é o mesmo da lousa. Cada grupo vota em 2 demandas."),
+        h("p", { className: "lead" }, "Sem limite de tempo. A votação fica aberta e o grupo pode trocar o voto quando quiser."),
         loading ? h("p", null, "Carregando…") : h(React.Fragment, null,
             h("h2", { className: "vote-h" }, "1. Qual é o seu grupo?"),
             h("div", { className: "slot-grid", role: "group", "aria-label": "Seu grupo" },
@@ -518,14 +518,14 @@ function Votacao() {
                         picks.length === 1 ? ["Demanda ", h("b", null, picks[0]), " selecionada. Falta 1."] :
                             ["Demandas ", h("b", null, picks[0]), " e ", h("b", null, picks[1]), " selecionadas."]
                 ),
-                existing && h("p", { className: "vote-note" }, "Este grupo já votou. Confirmar de novo substitui o voto anterior."),
+                existing && h("p", { className: "vote-note" }, "Este grupo já enviou um voto. Enviar de novo só troca a escolha."),
                 h("div", { className: "row" },
                     h("button", {
                         type: "button",
                         className: "btn",
                         disabled: picks.length !== 2 || saving,
                         onClick: submit
-                    }, saving ? "Enviando…" : "Confirmar voto"),
+                    }, saving ? "Enviando…" : "Enviar voto"),
                     h("button", { type: "button", className: "btn s", onClick: () => go("resultado") }, "Ver resultado")
                 ),
                 done && h("p", { className: "vote-ok", role: "status" }, "Voto do grupo " + voter + " registrado.")
