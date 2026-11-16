@@ -386,17 +386,25 @@ function saveVote(list, group, picks) {
         .then(check);
 }
 
+const SLOTS = [1, 2, 3, 4, 5, 6];
+
+function slotStyle(number) {
+    const group = GROUPS[number - 1] || GROUPS[0];
+    return { "--c": group.color, "--t": group.textColor };
+}
+
 function rankVotes(list) {
     const map = latestByGroup(list);
     const counts = {};
-    GROUPS.forEach(group => { counts[group.number] = 0; });
+    SLOTS.forEach(number => { counts[number] = 0; });
     Object.keys(map).forEach(key => {
+        if (SLOTS.indexOf(+key) < 0) return;
         (map[key].picks || []).forEach(number => {
             if (counts[number] != null) counts[number] += 1;
         });
     });
-    return GROUPS.map(group => ({ group: group, count: counts[group.number] }))
-        .sort((a, b) => b.count - a.count || a.group.number - b.group.number);
+    return SLOTS.map(number => ({ number: number, count: counts[number] }))
+        .sort((a, b) => b.count - a.count || a.number - b.number);
 }
 
 function leadingDemands(ranked) {
@@ -431,7 +439,7 @@ function Votacao() {
         const previous = latestByGroup(votes)[number];
         setVoter(number);
         setDone(false);
-        setPicks(previous && Array.isArray(previous.picks) ? previous.picks.slice(0, 2) : []);
+        setPicks(previous && Array.isArray(previous.picks) ? previous.picks.filter(item => SLOTS.indexOf(item) >= 0).slice(0, 2) : []);
     };
 
     const toggle = number => {
@@ -461,45 +469,54 @@ function Votacao() {
 
     return h("section", { className: "view vote" },
         h("h1", null, "Votação"),
-        h("p", { className: "lead" }, "Cada grupo vota em 2 demandas. O voto pode ser trocado antes do fim."),
+        h("p", { className: "lead" }, "O número daqui é o mesmo da lousa. Cada grupo vota em 2 demandas."),
         loading ? h("p", null, "Carregando…") : h(React.Fragment, null,
             h("h2", { className: "vote-h" }, "1. Qual é o seu grupo?"),
-            h("div", { className: "vote-groups", role: "group", "aria-label": "Seu grupo" },
-                GROUPS.map(group => h("button", {
+            h("div", { className: "slot-grid", role: "group", "aria-label": "Seu grupo" },
+                SLOTS.map(number => h("button", {
                     type: "button",
-                    key: group.number,
-                    className: "vote-group",
-                    style: { "--c": group.color, "--t": group.textColor },
-                    "aria-pressed": voter === group.number,
-                    onClick: () => chooseGroup(group.number)
+                    key: number,
+                    className: "slot" + (voter === number ? " is-on" : ""),
+                    style: slotStyle(number),
+                    "aria-pressed": voter === number,
+                    "aria-label": "Grupo " + number,
+                    onClick: () => chooseGroup(number)
                 },
-                    h("b", null, group.number),
-                    h("span", null, group.theme)
+                    h("span", { className: "slot-num" }, number),
+                    voter === number && h("span", { className: "slot-check", "aria-hidden": "true" }, "✓")
                 ))
             ),
+            voter != null && h("p", { className: "pick-banner", key: "grupo-" + voter, role: "status" },
+                "Grupo ", h("b", null, voter), " selecionado"
+            ),
             voter != null && h(React.Fragment, null,
-                h("h2", { className: "vote-h" }, "2. Escolha 2 demandas"),
-                h("p", { className: "vote-count" }, picks.length + " de 2 selecionadas"),
-                h("div", { className: "vote-list" },
-                    GROUPS.map(group => {
-                        const selected = picks.indexOf(group.number) >= 0;
+                h("h2", { className: "vote-h" }, "2. Escolha 2 demandas da lousa"),
+                h("div", { className: "slot-grid" },
+                    SLOTS.map(number => {
+                        const selected = picks.indexOf(number) >= 0;
                         return h("button", {
                             type: "button",
-                            key: group.number,
-                            className: "vote-option" + (selected ? " is-on" : ""),
-                            style: { "--c": group.color, "--t": group.textColor },
+                            key: number,
+                            className: "slot" + (selected ? " is-on" : ""),
+                            style: slotStyle(number),
                             "aria-pressed": selected,
+                            "aria-label": "Demanda " + number,
                             disabled: !selected && picks.length >= 2,
-                            onClick: () => toggle(group.number)
+                            onClick: () => toggle(number)
                         },
-                            h("span", { className: "vote-n" }, group.number),
-                            h("span", null,
-                                h("strong", null, "Demanda do grupo " + group.number),
-                                h("br"),
-                                group.theme
-                            )
+                            h("span", { className: "slot-num" }, number),
+                            selected && h("span", { className: "slot-check", "aria-hidden": "true" }, "✓")
                         );
                     })
+                ),
+                h("p", {
+                    className: "pick-banner" + (picks.length === 2 ? " is-ready" : ""),
+                    key: "demanda-" + picks.join("-"),
+                    role: "status"
+                },
+                    picks.length === 0 ? "Toque em 2 números da lousa." :
+                        picks.length === 1 ? ["Demanda ", h("b", null, picks[0]), " selecionada. Falta 1."] :
+                            ["Demandas ", h("b", null, picks[0]), " e ", h("b", null, picks[1]), " selecionadas."]
                 ),
                 existing && h("p", { className: "vote-note" }, "Este grupo já votou. Confirmar de novo substitui o voto anterior."),
                 h("div", { className: "row" },
@@ -549,39 +566,36 @@ function Resultado() {
     const ranked = rankVotes(votes);
     const leaders = leadingDemands(ranked);
     const max = ranked.reduce((highest, item) => Math.max(highest, item.count), 0);
-    const votedGroups = Object.keys(latestByGroup(votes));
+    const votedGroups = SLOTS.filter(number => latestByGroup(votes)[number]);
 
     return h("section", { className: "view" },
         h("h1", null, "Resultado"),
         h("p", { className: "lead" },
-            loading ? "Carregando…" : votedGroups.length + " de " + GROUPS.length + " grupos votaram. A tela atualiza sozinha."
+            loading ? "Carregando…" : votedGroups.length + " de 6 grupos votaram. A tela atualiza sozinha."
         ),
         !loading && !leaders.length && h("p", null, "Ainda não há votos."),
         leaders.length > 0 && h(React.Fragment, null,
             h("h2", { className: "vote-h" }, leaders.length > 2 ? "Mais votadas, com empate" : "As 2 mais votadas"),
-            h("div", { className: "winner-list" },
+            h("div", { className: "slot-grid winners" },
                 leaders.map(item => h("article", {
-                    key: item.group.number,
-                    className: "winner",
-                    style: { "--c": item.group.color, "--t": item.group.textColor }
+                    key: item.number,
+                    className: "slot is-on winner-slot",
+                    style: slotStyle(item.number)
                 },
-                    h("span", { className: "vote-n" }, item.group.number),
-                    h("div", null,
-                        h("strong", null, item.group.theme),
-                        h("p", null, item.count + (item.count === 1 ? " voto" : " votos"))
-                    )
+                    h("span", { className: "slot-num" }, item.number),
+                    h("span", { className: "slot-meta" }, item.count + (item.count === 1 ? " voto" : " votos"))
                 ))
             )
         ),
         h("h2", { className: "vote-h" }, "Contagem"),
         h("div", { className: "rank-list" },
             ranked.map(item => h("div", {
-                key: item.group.number,
+                key: item.number,
                 className: "rank-row",
-                style: { "--c": item.group.color }
+                style: slotStyle(item.number)
             },
                 h("div", { className: "rank-label" },
-                    h("span", null, "Grupo " + item.group.number + " · " + item.group.theme),
+                    h("span", null, "Demanda " + item.number),
                     h("b", null, String(item.count))
                 ),
                 h("div", { className: "bar", "aria-hidden": "true" },
