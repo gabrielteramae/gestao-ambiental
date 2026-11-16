@@ -399,6 +399,7 @@ function saveVote(list, group, picks) {
         .then(check);
 }
 
+const LOCK_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2zm-7-2a2 2 0 1 1 4 0v2h-4V7z"/></svg>';
 const GROUPS_VOTE = [1, 2, 3, 4, 5, 7];
 const DEMANDS = [1, 2, 3, 4, 5, 6];
 
@@ -479,21 +480,35 @@ function Votacao() {
     return h("section", { className: "view vote" },
         h("h1", null, "Votação"),
         h("p", { className: "lead" }, "Sem limite de tempo. A votação fica aberta e o grupo pode trocar o voto quando quiser."),
+        h("p", { className: "vote-alert", role: "note" },
+            h("strong", null, "Atenção: "),
+            "só uma pessoa do grupo deve votar."
+        ),
         loading ? h("p", null, "Carregando…") : h(React.Fragment, null,
             h("h2", { className: "vote-h" }, "1. Qual é o seu grupo?"),
             h("div", { className: "slot-list", role: "group", "aria-label": "Seu grupo" },
-                GROUPS_VOTE.map(number => h("button", {
-                    type: "button",
-                    key: number,
-                    className: "slot" + (voter === number ? " is-on" : ""),
-                    "aria-pressed": voter === number,
-                    "aria-label": "Grupo " + number,
-                    onClick: () => chooseGroup(number)
-                },
-                    h("span", { className: "slot-num" }, number),
-                    h("span", { className: "slot-label" }, "Grupo " + number),
-                    voter === number && h("span", { className: "slot-check", "aria-hidden": "true" }, "✓")
-                ))
+                GROUPS_VOTE.reduce((rows, number) => {
+                    rows.push(h("button", {
+                        type: "button",
+                        key: number,
+                        className: "slot" + (voter === number ? " is-on" : ""),
+                        "aria-pressed": voter === number,
+                        "aria-label": "Grupo " + number,
+                        onClick: () => chooseGroup(number)
+                    },
+                        h("span", { className: "slot-num" }, number),
+                        h("span", { className: "slot-label" }, "Grupo " + number),
+                        voter === number && h("span", { className: "slot-check", "aria-hidden": "true" }, "✓")
+                    ));
+                    if (number === 5) {
+                        rows.push(h("div", { key: "lock", className: "slot is-locked" },
+                            h("span", { className: "slot-num" }, "6"),
+                            h("span", { className: "slot-label" }, "Não tem grupo 6. O 6 sou eu, e eu apresento."),
+                            h("span", { className: "slot-lock", "aria-hidden": "true", dangerouslySetInnerHTML: { __html: LOCK_ICON } })
+                        ));
+                    }
+                    return rows;
+                }, [])
             ),
             voter != null && h("p", { className: "pick-banner", key: "grupo-" + voter, role: "status" },
                 "Grupo ", h("b", null, voter), " selecionado"
