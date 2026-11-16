@@ -566,17 +566,20 @@ function Votacao() {
                         picks.length === 1 ? ["Demanda ", h("b", null, picks[0]), " selecionada. Falta 1."] :
                             ["Demandas ", h("b", null, picks[0]), " e ", h("b", null, picks[1]), " selecionadas."]
                 ),
-                existing && h("p", { className: "vote-note" }, "Este grupo já enviou um voto. Enviar de novo só troca a escolha."),
+                done
+                    ? h("p", { className: "pick-banner is-ready", role: "status" }, "Voto do grupo ", h("b", null, voter), " registrado.")
+                    : existing
+                        ? h("p", { className: "vote-note" }, "Enviar de novo só troca a escolha deste grupo.")
+                        : null,
                 h("div", { className: "row" },
                     h("button", {
                         type: "button",
-                        className: "btn",
+                        className: "btn vote-send",
                         disabled: picks.length !== 2 || saving,
                         onClick: submit
                     }, saving ? "Enviando…" : "Enviar voto"),
                     h("button", { type: "button", className: "btn s", onClick: () => go("resultado") }, "Ver resultado")
-                ),
-                done && h("p", { className: "vote-ok", role: "status" }, "Voto do grupo " + voter + " registrado.")
+                )
             ),
             error && h("p", { className: "vote-err", role: "alert" }, error)
         )
