@@ -378,8 +378,15 @@ function readVotes() {
     return fetch(VOTE_ROOT + "/GetValue/gestaoambiental2026/urna").then(response => {
         if (response.status === 404) return [];
         if (!response.ok) throw new Error("load");
-        return response.json();
-    }).then(decodeVotes);
+        return response.text();
+    }).then(text => {
+        if (!text) return [];
+        try {
+            return decodeVotes(JSON.parse(text));
+        } catch (e) {
+            return decodeVotes(text);
+        }
+    });
 }
 
 let clearedOnThisLoad = null;
@@ -388,7 +395,8 @@ function writeVotes(list) {
     const value = encodeVotes(list);
     return fetch(VOTE_ROOT + "/UpdateValue/gestaoambiental2026/urna/" + value, {
         method: "POST",
-        body: ""
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "ok=1"
     }).then(response => {
         if (!response.ok) throw new Error("save");
     });
