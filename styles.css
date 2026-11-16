@@ -308,7 +308,6 @@ h1,
     background: var(--card);
     color: var(--ink);
     border: 1px solid var(--line);
-    border-top: 6px solid var(--c, var(--line));
     border-radius: 22px;
     padding: 20px 20px 52px;
     box-shadow: 0 10px 30px rgba(0, 40, 32, .2);
@@ -334,9 +333,9 @@ h1,
     width: 46px;
     height: 46px;
     border-radius: 14px;
-    background: var(--c, var(--teal));
-    color: var(--t, #fff);
-    border: 0;
+    background: #fff;
+    color: var(--teal);
+    border: 2px solid var(--teal);
     font-size: 1.4rem;
     font-weight: 800;
     margin: 8px 0 12px;
@@ -820,6 +819,20 @@ h1,
 }
 
 
+.nav-vote {
+    background: #fff;
+    color: var(--teal);
+    font-weight: 800;
+}
+
+.vote-cta {
+    width: min(100%, 280px);
+    margin: 4px auto 16px;
+    font-size: 1.45rem;
+    font-weight: 800;
+    min-height: 64px;
+}
+
 .btn:disabled {
     opacity: .5;
     cursor: default;
@@ -943,7 +956,7 @@ h1,
     display: block;
     height: 100%;
     width: 0;
-    background: var(--c, #fff);
+    background: var(--teal, #fff);
 }
 
 
@@ -975,13 +988,13 @@ h1,
     font-size: 2.4rem;
     font-weight: 800;
     line-height: 1;
-    color: var(--c);
+    color: var(--teal);
 }
 
 .slot-meta {
     font-size: .85rem;
     font-weight: 700;
-    color: var(--t);
+    color: #fff;
 }
 
 .slot-check {
@@ -992,7 +1005,7 @@ h1,
     height: 26px;
     border-radius: 50%;
     background: #fff;
-    color: var(--c);
+    color: var(--teal);
     font-size: 1rem;
     font-weight: 800;
     display: grid;
@@ -1001,13 +1014,13 @@ h1,
 }
 
 .slot.is-on {
-    background: var(--c);
-    box-shadow: 0 0 0 4px #fff, 0 0 0 8px var(--c);
+    background: var(--teal);
+    box-shadow: 0 0 0 4px #fff, 0 0 0 8px var(--teal);
     animation: pick-pop .4s ease;
 }
 
 .slot.is-on .slot-num {
-    color: var(--t);
+    color: #fff;
 }
 
 .slot:disabled {

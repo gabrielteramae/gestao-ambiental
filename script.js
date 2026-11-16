@@ -131,7 +131,7 @@ const CARTA_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4
 function Navbar({ current }) {
     const item = (id, label, icon) => h("button", {
         type: "button",
-        className: "nav-link",
+        className: "nav-link" + (id === "votar" ? " nav-vote" : ""),
         "aria-current": current === id ? "page" : undefined,
         onClick: () => go(id)
     },
@@ -184,7 +184,6 @@ function Groups() {
             GROUPS.map(group => h("button", {
                 key: group.number,
                 className: "card",
-                style: { "--c": group.color, "--t": group.textColor },
                 onClick: () => go("g" + group.number)
             },
                 h("small", null, "Grupo"),
@@ -213,6 +212,7 @@ function Home({ route }) {
     return h(React.Fragment, null,
         h("section", { className: "view earth-hero" },
             h("h1", null, SITE_NAME),
+            h("button", { type: "button", className: "btn vote-cta", onClick: () => go("votar") }, "Votar"),
             h(Qr),
             h("div", { style: { display: "flex", justifyContent: "center", marginTop: 10 } },
                 h("button", { className: "hint", onClick: showGroups }, "Desça a página e descubra qual é o seu tema ↓")
@@ -386,12 +386,7 @@ function saveVote(list, group, picks) {
         .then(check);
 }
 
-const SLOTS = [1, 2, 3, 4, 5, 6];
-
-function slotStyle(number) {
-    const group = GROUPS[number - 1] || GROUPS[0];
-    return { "--c": group.color, "--t": group.textColor };
-}
+const SLOTS = [1, 2, 3, 4, 5, 7];
 
 function rankVotes(list) {
     const map = latestByGroup(list);
@@ -477,7 +472,6 @@ function Votacao() {
                     type: "button",
                     key: number,
                     className: "slot" + (voter === number ? " is-on" : ""),
-                    style: slotStyle(number),
                     "aria-pressed": voter === number,
                     "aria-label": "Grupo " + number,
                     onClick: () => chooseGroup(number)
@@ -498,8 +492,7 @@ function Votacao() {
                             type: "button",
                             key: number,
                             className: "slot" + (selected ? " is-on" : ""),
-                            style: slotStyle(number),
-                            "aria-pressed": selected,
+                                    "aria-pressed": selected,
                             "aria-label": "Demanda " + number,
                             disabled: !selected && picks.length >= 2,
                             onClick: () => toggle(number)
@@ -580,7 +573,6 @@ function Resultado() {
                 leaders.map(item => h("article", {
                     key: item.number,
                     className: "slot is-on winner-slot",
-                    style: slotStyle(item.number)
                 },
                     h("span", { className: "slot-num" }, item.number),
                     h("span", { className: "slot-meta" }, item.count + (item.count === 1 ? " voto" : " votos"))
@@ -591,8 +583,7 @@ function Resultado() {
         h("div", { className: "rank-list" },
             ranked.map(item => h("div", {
                 key: item.number,
-                className: "rank-row",
-                style: slotStyle(item.number)
+                className: "rank-row"
             },
                 h("div", { className: "rank-label" },
                     h("span", null, "Demanda " + item.number),
