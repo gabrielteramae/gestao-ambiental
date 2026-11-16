@@ -960,26 +960,27 @@ h1,
 }
 
 
-.slot-grid {
+.slot-list {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr;
     gap: 10px;
 }
 
 .slot {
     font: inherit;
     position: relative;
-    min-height: 92px;
-    border: 3px solid transparent;
-    border-radius: 18px;
+    min-height: 64px;
+    border: 2px solid var(--line);
+    border-radius: 16px;
     background: #fff;
     color: var(--ink);
     cursor: pointer;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
-    gap: 2px;
+    justify-content: flex-start;
+    gap: 14px;
+    padding: 0 16px;
     box-shadow: 0 8px 22px rgba(0, 30, 25, .18);
     -webkit-tap-highlight-color: transparent;
 }
@@ -991,10 +992,15 @@ h1,
     color: var(--teal);
 }
 
+.slot-label {
+    font-weight: 700;
+    color: var(--ink);
+}
+
 .slot-meta {
     font-size: .85rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--teal);
 }
 
 .slot-check {
@@ -1014,13 +1020,14 @@ h1,
 }
 
 .slot.is-on {
-    background: var(--teal);
-    box-shadow: 0 0 0 4px #fff, 0 0 0 8px var(--teal);
+    background: #fff;
+    border-color: var(--teal);
+    box-shadow: inset 6px 0 0 var(--teal);
     animation: pick-pop .4s ease;
 }
 
 .slot.is-on .slot-num {
-    color: #fff;
+    color: var(--teal);
 }
 
 .slot:disabled {

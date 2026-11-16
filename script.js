@@ -386,19 +386,20 @@ function saveVote(list, group, picks) {
         .then(check);
 }
 
-const SLOTS = [1, 2, 3, 4, 5, 7];
+const GROUPS_VOTE = [1, 2, 3, 4, 5, 6, 7];
+const DEMANDS = [1, 2, 3, 4, 5, 6];
 
 function rankVotes(list) {
     const map = latestByGroup(list);
     const counts = {};
-    SLOTS.forEach(number => { counts[number] = 0; });
+    DEMANDS.forEach(number => { counts[number] = 0; });
     Object.keys(map).forEach(key => {
-        if (SLOTS.indexOf(+key) < 0) return;
+        if (GROUPS_VOTE.indexOf(+key) < 0) return;
         (map[key].picks || []).forEach(number => {
             if (counts[number] != null) counts[number] += 1;
         });
     });
-    return SLOTS.map(number => ({ number: number, count: counts[number] }))
+    return DEMANDS.map(number => ({ number: number, count: counts[number] }))
         .sort((a, b) => b.count - a.count || a.number - b.number);
 }
 
@@ -434,7 +435,7 @@ function Votacao() {
         const previous = latestByGroup(votes)[number];
         setVoter(number);
         setDone(false);
-        setPicks(previous && Array.isArray(previous.picks) ? previous.picks.filter(item => SLOTS.indexOf(item) >= 0).slice(0, 2) : []);
+        setPicks(previous && Array.isArray(previous.picks) ? previous.picks.filter(item => DEMANDS.indexOf(item) >= 0).slice(0, 2) : []);
     };
 
     const toggle = number => {
@@ -467,8 +468,8 @@ function Votacao() {
         h("p", { className: "lead" }, "Sem limite de tempo. A votação fica aberta e o grupo pode trocar o voto quando quiser."),
         loading ? h("p", null, "Carregando…") : h(React.Fragment, null,
             h("h2", { className: "vote-h" }, "1. Qual é o seu grupo?"),
-            h("div", { className: "slot-grid", role: "group", "aria-label": "Seu grupo" },
-                SLOTS.map(number => h("button", {
+            h("div", { className: "slot-list", role: "group", "aria-label": "Seu grupo" },
+                GROUPS_VOTE.map(number => h("button", {
                     type: "button",
                     key: number,
                     className: "slot" + (voter === number ? " is-on" : ""),
@@ -477,6 +478,7 @@ function Votacao() {
                     onClick: () => chooseGroup(number)
                 },
                     h("span", { className: "slot-num" }, number),
+                    h("span", { className: "slot-label" }, "Grupo " + number),
                     voter === number && h("span", { className: "slot-check", "aria-hidden": "true" }, "✓")
                 ))
             ),
@@ -485,19 +487,20 @@ function Votacao() {
             ),
             voter != null && h(React.Fragment, null,
                 h("h2", { className: "vote-h" }, "2. Escolha 2 demandas da lousa"),
-                h("div", { className: "slot-grid" },
-                    SLOTS.map(number => {
+                h("div", { className: "slot-list" },
+                    DEMANDS.map(number => {
                         const selected = picks.indexOf(number) >= 0;
                         return h("button", {
                             type: "button",
                             key: number,
                             className: "slot" + (selected ? " is-on" : ""),
-                                    "aria-pressed": selected,
+                            "aria-pressed": selected,
                             "aria-label": "Demanda " + number,
                             disabled: !selected && picks.length >= 2,
                             onClick: () => toggle(number)
                         },
                             h("span", { className: "slot-num" }, number),
+                            h("span", { className: "slot-label" }, "Demanda " + number),
                             selected && h("span", { className: "slot-check", "aria-hidden": "true" }, "✓")
                         );
                     })
@@ -559,17 +562,17 @@ function Resultado() {
     const ranked = rankVotes(votes);
     const leaders = leadingDemands(ranked);
     const max = ranked.reduce((highest, item) => Math.max(highest, item.count), 0);
-    const votedGroups = SLOTS.filter(number => latestByGroup(votes)[number]);
+    const votedGroups = GROUPS_VOTE.filter(number => latestByGroup(votes)[number]);
 
     return h("section", { className: "view" },
         h("h1", null, "Resultado"),
         h("p", { className: "lead" },
-            loading ? "Carregando…" : votedGroups.length + " de 6 grupos votaram. A tela atualiza sozinha."
+            loading ? "Carregando…" : votedGroups.length + " de 7 grupos votaram. A tela atualiza sozinha."
         ),
         !loading && !leaders.length && h("p", null, "Ainda não há votos."),
         leaders.length > 0 && h(React.Fragment, null,
             h("h2", { className: "vote-h" }, leaders.length > 2 ? "Mais votadas, com empate" : "As 2 mais votadas"),
-            h("div", { className: "slot-grid winners" },
+            h("div", { className: "slot-list winners" },
                 leaders.map(item => h("article", {
                     key: item.number,
                     className: "slot is-on winner-slot",
