@@ -350,25 +350,53 @@ function Carta() {
     );
 }
 
-const VOTE_API = "https://crudcrud.com/api/1738ea4ccf594c198b8369f8b0af7ec2/votos";
+const VOTE_ROOT = "https://keyvalue.immanuel.co/api/KeyVal";
+
+function encodeVotes(list) {
+    const parts = (list || [])
+        .filter(vote => vote && GROUPS_VOTE.indexOf(+vote.group) >= 0 && Array.isArray(vote.picks))
+        .map(vote => {
+            const picks = vote.picks.filter(item => DEMANDS.indexOf(item) >= 0).slice(0, 2);
+            return picks.length ? (+vote.group) + "a" + picks.join("b") : "";
+        })
+        .filter(Boolean);
+    return parts.length ? parts.join("_") : "0";
+}
+
+function decodeVotes(raw) {
+    const text = String(raw == null ? "" : raw);
+    if (!text || text === "0") return [];
+    return text.split("_").map(part => {
+        const bits = part.split("a");
+        const group = +bits[0];
+        const picks = String(bits[1] || "").split("b").map(Number).filter(item => DEMANDS.indexOf(item) >= 0).slice(0, 2);
+        return GROUPS_VOTE.indexOf(group) >= 0 && picks.length === 2 ? { group: group, picks: picks } : null;
+    }).filter(Boolean);
+}
 
 function readVotes() {
-    return fetch(VOTE_API).then(response => {
+    return fetch(VOTE_ROOT + "/GetValue/gestaoambiental2026/urna").then(response => {
+        if (response.status === 404) return [];
         if (!response.ok) throw new Error("load");
         return response.json();
-    });
+    }).then(decodeVotes);
 }
 
 let clearedOnThisLoad = null;
 
+function writeVotes(list) {
+    const value = encodeVotes(list);
+    return fetch(VOTE_ROOT + "/UpdateValue/gestaoambiental2026/urna/" + value, {
+        method: "POST",
+        body: ""
+    }).then(response => {
+        if (!response.ok) throw new Error("save");
+    });
+}
+
 function clearStoredVotes() {
     if (!clearedOnThisLoad) {
-        clearedOnThisLoad = readVotes()
-            .then(list => Promise.all((list || []).map(vote => {
-                if (!vote || !vote._id) return null;
-                return fetch(VOTE_API + "/" + vote._id, { method: "DELETE" });
-            })))
-            .then(() => []);
+        clearedOnThisLoad = writeVotes([]).then(() => []);
     }
     return clearedOnThisLoad;
 }
@@ -382,21 +410,9 @@ function latestByGroup(list) {
 }
 
 function saveVote(list, group, picks) {
-    const headers = { "Content-Type": "application/json" };
-    const body = JSON.stringify({ group: group, picks: picks });
-    const same = (list || []).filter(vote => vote.group === group);
-    const check = response => {
-        if (!response.ok) throw new Error("save");
-        return response;
-    };
-    if (!same.length) {
-        return fetch(VOTE_API, { method: "POST", headers: headers, body: body }).then(check);
-    }
-    const keep = same[same.length - 1];
-    const extras = same.slice(0, -1);
-    return Promise.all(extras.map(vote => fetch(VOTE_API + "/" + vote._id, { method: "DELETE" })))
-        .then(() => fetch(VOTE_API + "/" + keep._id, { method: "PUT", headers: headers, body: body }))
-        .then(check);
+    const next = (list || []).filter(vote => vote.group !== group);
+    next.push({ group: group, picks: picks });
+    return writeVotes(next);
 }
 
 const LOCK_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2zm-7-2a2 2 0 1 1 4 0v2h-4V7z"/></svg>';

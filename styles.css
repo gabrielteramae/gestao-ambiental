@@ -1076,7 +1076,7 @@ h1,
 }
 
 .slot:disabled {
-    opacity: .38;
+    opacity: .72;
     cursor: default;
     animation: none;
 }
