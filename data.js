@@ -90,7 +90,7 @@ const GROUPS = [
         stats: [
             { value: 13, suffix: "%", label: "dos empregos da cidade estão na Zona Leste" },
             { value: 35, suffix: "%", label: "da população paulistana vive lá" },
-            { value: 12, prefix: "11–", suffix: "%", label: "de cobertura vegetal (a cidade toda: 54%)" }
+            { value: 12, raw: true, prefix: "11–", suffix: "%", label: "de cobertura vegetal (a cidade toda: 54%)" }
         ],
         text: [
             "No podcast, o pesquisador José Luiz Portella (USP) lembra que a zona leste tem mais de 4 milhões de habitantes, cerca de 35% do município, mas apenas 13% dos empregos. A renda média local é de dois terços da do resto da cidade.",

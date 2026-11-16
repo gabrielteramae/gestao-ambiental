@@ -129,16 +129,20 @@ function SecretSurprise() {
 const CARTA_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>';
 
 function Navbar({ current }) {
+    const item = (id, label, icon) => h("button", {
+        type: "button",
+        className: "nav-link",
+        "aria-current": current === id ? "page" : undefined,
+        onClick: () => go(id)
+    },
+        icon ? h("span", { dangerouslySetInnerHTML: { __html: icon } }) : null,
+        h("span", null, label)
+    );
+
     return h("nav", { className: "navbar", "aria-label": "Principal" },
         h("div", { className: "nav-links" },
-            h("button", {
-                className: "nav-link",
-                "aria-current": current === "carta" ? "page" : undefined,
-                onClick: () => go("carta")
-            },
-                h("span", { dangerouslySetInnerHTML: { __html: CARTA_ICON } }),
-                h("span", null, "Carta da Juventude")
-            )
+            item("carta", "Carta da Juventude", CARTA_ICON),
+            item("votar", "Votação")
         )
     );
 }
@@ -180,6 +184,7 @@ function Groups() {
             GROUPS.map(group => h("button", {
                 key: group.number,
                 className: "card",
+                style: { "--c": group.color, "--t": group.textColor },
                 onClick: () => go("g" + group.number)
             },
                 h("small", null, "Grupo"),
@@ -346,6 +351,251 @@ function Carta() {
     );
 }
 
+const VOTE_API = "https://crudcrud.com/api/1738ea4ccf594c198b8369f8b0af7ec2/votos";
+
+function readVotes() {
+    return fetch(VOTE_API).then(response => {
+        if (!response.ok) throw new Error("load");
+        return response.json();
+    });
+}
+
+function latestByGroup(list) {
+    const map = {};
+    (list || []).forEach(vote => {
+        if (vote && vote.group != null) map[vote.group] = vote;
+    });
+    return map;
+}
+
+function saveVote(list, group, picks) {
+    const headers = { "Content-Type": "application/json" };
+    const body = JSON.stringify({ group: group, picks: picks });
+    const same = (list || []).filter(vote => vote.group === group);
+    const check = response => {
+        if (!response.ok) throw new Error("save");
+        return response;
+    };
+    if (!same.length) {
+        return fetch(VOTE_API, { method: "POST", headers: headers, body: body }).then(check);
+    }
+    const keep = same[same.length - 1];
+    const extras = same.slice(0, -1);
+    return Promise.all(extras.map(vote => fetch(VOTE_API + "/" + vote._id, { method: "DELETE" })))
+        .then(() => fetch(VOTE_API + "/" + keep._id, { method: "PUT", headers: headers, body: body }))
+        .then(check);
+}
+
+function rankVotes(list) {
+    const map = latestByGroup(list);
+    const counts = {};
+    GROUPS.forEach(group => { counts[group.number] = 0; });
+    Object.keys(map).forEach(key => {
+        (map[key].picks || []).forEach(number => {
+            if (counts[number] != null) counts[number] += 1;
+        });
+    });
+    return GROUPS.map(group => ({ group: group, count: counts[group.number] }))
+        .sort((a, b) => b.count - a.count || a.group.number - b.group.number);
+}
+
+function leadingDemands(ranked) {
+    const withVotes = ranked.filter(item => item.count > 0);
+    if (!withVotes.length) return [];
+    const first = withVotes[0].count;
+    const tiedFirst = withVotes.filter(item => item.count === first);
+    if (tiedFirst.length >= 2) return tiedFirst;
+    const second = withVotes[1] ? withVotes[1].count : 0;
+    return withVotes.filter(item => item.count === first || item.count === second);
+}
+
+function Votacao() {
+    const [votes, setVotes] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [voter, setVoter] = useState(null);
+    const [picks, setPicks] = useState([]);
+    const [saving, setSaving] = useState(false);
+    const [done, setDone] = useState(false);
+
+    useEffect(() => {
+        let live = true;
+        readVotes()
+            .then(data => { if (live) setVotes(data); })
+            .catch(() => { if (live) setError("Não foi possível carregar a votação. Verifique a internet e tente de novo."); })
+            .finally(() => { if (live) setLoading(false); });
+        return () => { live = false; };
+    }, []);
+
+    const chooseGroup = number => {
+        const previous = latestByGroup(votes)[number];
+        setVoter(number);
+        setDone(false);
+        setPicks(previous && Array.isArray(previous.picks) ? previous.picks.slice(0, 2) : []);
+    };
+
+    const toggle = number => {
+        setPicks(current => {
+            if (current.indexOf(number) >= 0) return current.filter(item => item !== number);
+            if (current.length >= 2) return current;
+            return current.concat(number);
+        });
+    };
+
+    const submit = () => {
+        if (voter == null || picks.length !== 2 || saving) return;
+        setSaving(true);
+        setError("");
+        const currentVotes = votes;
+        saveVote(currentVotes, voter, picks)
+            .then(() => readVotes())
+            .then(data => {
+                setVotes(data);
+                setDone(true);
+            })
+            .catch(() => setError("Não foi possível registrar o voto. Tente de novo."))
+            .finally(() => setSaving(false));
+    };
+
+    const existing = voter != null && latestByGroup(votes)[voter];
+
+    return h("section", { className: "view vote" },
+        h("h1", null, "Votação"),
+        h("p", { className: "lead" }, "Cada grupo vota em 2 demandas. O voto pode ser trocado antes do fim."),
+        loading ? h("p", null, "Carregando…") : h(React.Fragment, null,
+            h("h2", { className: "vote-h" }, "1. Qual é o seu grupo?"),
+            h("div", { className: "vote-groups", role: "group", "aria-label": "Seu grupo" },
+                GROUPS.map(group => h("button", {
+                    type: "button",
+                    key: group.number,
+                    className: "vote-group",
+                    style: { "--c": group.color, "--t": group.textColor },
+                    "aria-pressed": voter === group.number,
+                    onClick: () => chooseGroup(group.number)
+                },
+                    h("b", null, group.number),
+                    h("span", null, group.theme)
+                ))
+            ),
+            voter != null && h(React.Fragment, null,
+                h("h2", { className: "vote-h" }, "2. Escolha 2 demandas"),
+                h("p", { className: "vote-count" }, picks.length + " de 2 selecionadas"),
+                h("div", { className: "vote-list" },
+                    GROUPS.map(group => {
+                        const selected = picks.indexOf(group.number) >= 0;
+                        return h("button", {
+                            type: "button",
+                            key: group.number,
+                            className: "vote-option" + (selected ? " is-on" : ""),
+                            style: { "--c": group.color, "--t": group.textColor },
+                            "aria-pressed": selected,
+                            disabled: !selected && picks.length >= 2,
+                            onClick: () => toggle(group.number)
+                        },
+                            h("span", { className: "vote-n" }, group.number),
+                            h("span", null,
+                                h("strong", null, "Demanda do grupo " + group.number),
+                                h("br"),
+                                group.theme
+                            )
+                        );
+                    })
+                ),
+                existing && h("p", { className: "vote-note" }, "Este grupo já votou. Confirmar de novo substitui o voto anterior."),
+                h("div", { className: "row" },
+                    h("button", {
+                        type: "button",
+                        className: "btn",
+                        disabled: picks.length !== 2 || saving,
+                        onClick: submit
+                    }, saving ? "Enviando…" : "Confirmar voto"),
+                    h("button", { type: "button", className: "btn s", onClick: () => go("resultado") }, "Ver resultado")
+                ),
+                done && h("p", { className: "vote-ok", role: "status" }, "Voto do grupo " + voter + " registrado.")
+            ),
+            error && h("p", { className: "vote-err", role: "alert" }, error)
+        )
+    );
+}
+
+function Resultado() {
+    const [votes, setVotes] = useState([]);
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let live = true;
+        const pull = () => readVotes()
+            .then(data => {
+                if (!live) return;
+                setVotes(data);
+                setError("");
+                setLoading(false);
+            })
+            .catch(() => {
+                if (live) {
+                    setError("Não foi possível atualizar o resultado.");
+                    setLoading(false);
+                }
+            });
+        pull();
+        const timer = setInterval(pull, 5000);
+        return () => {
+            live = false;
+            clearInterval(timer);
+        };
+    }, []);
+
+    const ranked = rankVotes(votes);
+    const leaders = leadingDemands(ranked);
+    const max = ranked.reduce((highest, item) => Math.max(highest, item.count), 0);
+    const votedGroups = Object.keys(latestByGroup(votes));
+
+    return h("section", { className: "view" },
+        h("h1", null, "Resultado"),
+        h("p", { className: "lead" },
+            loading ? "Carregando…" : votedGroups.length + " de " + GROUPS.length + " grupos votaram. A tela atualiza sozinha."
+        ),
+        !loading && !leaders.length && h("p", null, "Ainda não há votos."),
+        leaders.length > 0 && h(React.Fragment, null,
+            h("h2", { className: "vote-h" }, leaders.length > 2 ? "Mais votadas, com empate" : "As 2 mais votadas"),
+            h("div", { className: "winner-list" },
+                leaders.map(item => h("article", {
+                    key: item.group.number,
+                    className: "winner",
+                    style: { "--c": item.group.color, "--t": item.group.textColor }
+                },
+                    h("span", { className: "vote-n" }, item.group.number),
+                    h("div", null,
+                        h("strong", null, item.group.theme),
+                        h("p", null, item.count + (item.count === 1 ? " voto" : " votos"))
+                    )
+                ))
+            )
+        ),
+        h("h2", { className: "vote-h" }, "Contagem"),
+        h("div", { className: "rank-list" },
+            ranked.map(item => h("div", {
+                key: item.group.number,
+                className: "rank-row",
+                style: { "--c": item.group.color }
+            },
+                h("div", { className: "rank-label" },
+                    h("span", null, "Grupo " + item.group.number + " · " + item.group.theme),
+                    h("b", null, String(item.count))
+                ),
+                h("div", { className: "bar", "aria-hidden": "true" },
+                    h("i", { style: { width: (max ? Math.round(item.count / max * 100) : 0) + "%" } })
+                )
+            ))
+        ),
+        error && h("p", { className: "vote-err", role: "alert" }, error),
+        h("div", { className: "row" },
+            h("button", { type: "button", className: "btn s", onClick: () => go("votar") }, "← Voltar à votação")
+        )
+    );
+}
+
 function Footer() {
     return h("footer", { className: "site-footer" },
         "© 2026 Gabriel Teramae. Todos os direitos reservados."
@@ -363,8 +613,12 @@ function App() {
             ? `Grupo ${group.number} · ${SITE_NAME}`
             : route === "carta"
                 ? `Carta da Juventude · ${SITE_NAME}`
-                : SITE_NAME;
-    }, [route]);
+                : route === "votar"
+                    ? `Votação · ${SITE_NAME}`
+                    : route === "resultado"
+                        ? `Resultado · ${SITE_NAME}`
+                        : SITE_NAME;
+    }, [route, group]);
 
     useEffect(() => {
         if (firstRender.current) {
@@ -376,11 +630,13 @@ function App() {
     }, [route]);
 
     return h(React.Fragment, null,
-        h(Navbar, { current: route === "carta" ? "carta" : "" }),
+        h(Navbar, { current: route === "resultado" ? "votar" : route }),
         h("main", { id: "main", tabIndex: -1 },
             route === "carta" ? h(Carta) :
-                group ? h(News, { group, key: route }) :
-                    h(Home, { route })
+                route === "votar" ? h(Votacao) :
+                    route === "resultado" ? h(Resultado) :
+                        group ? h(News, { group, key: route }) :
+                            h(Home, { route })
         ),
         h(SecretSurprise)
     );
