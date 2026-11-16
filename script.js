@@ -385,7 +385,7 @@ function saveVote(list, group, picks) {
         .then(check);
 }
 
-const GROUPS_VOTE = [1, 2, 3, 4, 5, 6, 7];
+const GROUPS_VOTE = [1, 2, 3, 4, 5, 7];
 const DEMANDS = [1, 2, 3, 4, 5, 6];
 
 function rankVotes(list) {
@@ -566,7 +566,7 @@ function Resultado() {
     return h("section", { className: "view" },
         h("h1", null, "Resultado"),
         h("p", { className: "lead" },
-            loading ? "Carregando…" : votedGroups.length + " de 7 grupos votaram. A tela atualiza sozinha."
+            loading ? "Carregando…" : votedGroups.length + " de 6 grupos votaram. A tela atualiza sozinha."
         ),
         !loading && !leaders.length && h("p", null, "Ainda não há votos."),
         leaders.length > 0 && h(React.Fragment, null,
