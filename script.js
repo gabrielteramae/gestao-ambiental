@@ -359,6 +359,20 @@ function readVotes() {
     });
 }
 
+let clearedOnThisLoad = null;
+
+function clearStoredVotes() {
+    if (!clearedOnThisLoad) {
+        clearedOnThisLoad = readVotes()
+            .then(list => Promise.all((list || []).map(vote => {
+                if (!vote || !vote._id) return null;
+                return fetch(VOTE_API + "/" + vote._id, { method: "DELETE" });
+            })))
+            .then(() => []);
+    }
+    return clearedOnThisLoad;
+}
+
 function latestByGroup(list) {
     const map = {};
     (list || []).forEach(vote => {
@@ -423,7 +437,7 @@ function Votacao() {
 
     useEffect(() => {
         let live = true;
-        readVotes()
+        clearStoredVotes()
             .then(data => { if (live) setVotes(data); })
             .catch(() => { if (live) setError("Não foi possível carregar a votação. Verifique a internet e tente de novo."); })
             .finally(() => { if (live) setLoading(false); });
@@ -537,7 +551,7 @@ function Resultado() {
 
     useEffect(() => {
         let live = true;
-        const pull = () => readVotes()
+        const pull = first => (first ? clearStoredVotes().then(() => readVotes()) : readVotes())
             .then(data => {
                 if (!live) return;
                 setVotes(data);
@@ -550,8 +564,8 @@ function Resultado() {
                     setLoading(false);
                 }
             });
-        pull();
-        const timer = setInterval(pull, 5000);
+        pull(true);
+        const timer = setInterval(() => pull(false), 5000);
         return () => {
             live = false;
             clearInterval(timer);
