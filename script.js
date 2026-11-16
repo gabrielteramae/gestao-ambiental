@@ -141,8 +141,7 @@ function Navbar({ current }) {
 
     return h("nav", { className: "navbar", "aria-label": "Principal" },
         h("div", { className: "nav-links" },
-            item("carta", "Carta da Juventude", CARTA_ICON),
-            item("votar", "Votação")
+            item("carta", "Carta da Juventude", CARTA_ICON)
         )
     );
 }
