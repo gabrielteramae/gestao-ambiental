@@ -131,7 +131,7 @@ const CARTA_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4
 function Navbar({ current }) {
     const item = (id, label, icon) => h("button", {
         type: "button",
-        className: "nav-link" + (id === "votar" ? " nav-vote" : ""),
+        className: "nav-link",
         "aria-current": current === id ? "page" : undefined,
         onClick: () => go(id)
     },
@@ -389,8 +389,6 @@ function readVotes() {
     });
 }
 
-let clearedOnThisLoad = null;
-
 function writeVotes(list) {
     const value = encodeVotes(list);
     return fetch(VOTE_ROOT + "/UpdateValue/gestaoambiental2026/urna/" + value, {
@@ -402,13 +400,6 @@ function writeVotes(list) {
     });
 }
 
-function clearStoredVotes() {
-    if (!clearedOnThisLoad) {
-        clearedOnThisLoad = writeVotes([]).then(() => []);
-    }
-    return clearedOnThisLoad;
-}
-
 function latestByGroup(list) {
     const map = {};
     (list || []).forEach(vote => {
@@ -418,9 +409,17 @@ function latestByGroup(list) {
 }
 
 function saveVote(list, group, picks) {
-    const next = (list || []).filter(vote => vote.group !== group);
-    next.push({ group: group, picks: picks });
-    return writeVotes(next);
+    const merge = current => {
+        const next = (current || []).filter(vote => +vote.group !== +group);
+        next.push({ group: group, picks: picks.slice() });
+        return next;
+    };
+    const writeFresh = () => readVotes().then(merge).then(saved => writeVotes(saved).then(() => readVotes()));
+    return writeFresh().then(saved => {
+        const mine = latestByGroup(saved)[group];
+        const same = mine && mine.picks.length === picks.length && mine.picks.every((item, index) => item === picks[index]);
+        return same ? saved : writeFresh();
+    });
 }
 
 const LOCK_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2zm-7-2a2 2 0 1 1 4 0v2h-4V7z"/></svg>';
@@ -462,7 +461,7 @@ function Votacao() {
 
     useEffect(() => {
         let live = true;
-        clearStoredVotes()
+        readVotes()
             .then(data => { if (live) setVotes(data); })
             .catch(() => { if (live) setError("Não foi possível carregar a votação. Verifique a internet e tente de novo."); })
             .finally(() => { if (live) setLoading(false); });
@@ -593,7 +592,7 @@ function Resultado() {
 
     useEffect(() => {
         let live = true;
-        const pull = first => (first ? clearStoredVotes().then(() => readVotes()) : readVotes())
+        const pull = () => readVotes()
             .then(data => {
                 if (!live) return;
                 setVotes(data);
@@ -606,8 +605,8 @@ function Resultado() {
                     setLoading(false);
                 }
             });
-        pull(true);
-        const timer = setInterval(() => pull(false), 5000);
+        pull();
+        const timer = setInterval(pull, 5000);
         return () => {
             live = false;
             clearInterval(timer);
