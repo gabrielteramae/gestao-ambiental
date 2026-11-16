@@ -75,7 +75,7 @@ function SecretSurprise() {
     return h(React.Fragment, null,
         h("button", {
             className: "secret-emoji-btn",
-            title: "Ei, volte para a atividade!",
+            title: "Não era pra clicar, eu avisei. Volte para a atividade!",
             "aria-label": "Abrir surpresa",
             onClick: () => setIsOpen(true)
         },
@@ -107,7 +107,7 @@ function SecretSurprise() {
                     "aria-label": "Fechar",
                     onClick: () => setIsOpen(false)
                 }, "×"),
-                h("div", { className: "modal-title", id: "modal-title" }, "Ei, volte para a atividade!"),
+                h("div", { className: "modal-title", id: "modal-title" }, "Não era pra clicar, eu avisei. Volte para a atividade!"),
                 h("div", { className: "modal-video-container" },
                     h("video", {
                         ref: playVideo,
